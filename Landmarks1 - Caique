@@ -1,0 +1,51 @@
+import cv2
+import numpy as np
+import dlib
+import pandas
+import math 
+from IPython.display import Image
+
+def GetPoints(path_land_pred, path_png):
+    img = cv2.imread(path_png)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    mask = np.zeros_like(img_gray)
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(path_land_pred)
+    faces = detector(img_gray)
+    for face in faces:
+        landmarks = predictor(img_gray, face)
+        landmarks_points = []
+        val_x = []
+        val_y = []
+        for n in range(0, 68):
+            x = landmarks.part(n).x
+            y = landmarks.part(n).y
+            landmarks_points.append((x, y))
+            cv2.circle(img, (x, y), 3, (0, 0, 255), -1)
+            points = np.array(landmarks_points, np.int32)
+
+#     cv2.imshow("Image 1", img)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
+    return landmarks_points
+   
+landmarks = GetPoints('../Landmarks/shape_predictor_68_face_landmarks.dat', '../Imagens/Base/teste7.jpg')
+ 
+#Classe para cálculo da distancia entre os landmarks da face
+class FacePoints:
+   def __init__(self, landmarks_list):
+        self.mouth = landmarks_list
+        self.nose = landmarks_list
+        self.eyes = landmarks_list
+        self.face = landmarks_list
+        self.eyebrows = landmarks_list
+   
+#Função para calcular a distancia entre os landmarks da boca
+    def mouthLength(self):
+        mouth_pts_lgth = []
+        mouth_pts_lgth.append(self.mouth[63][0] - self.nose[52][0]) #var x dos pontos 64 e 53
+        mouth_pts_lgth.append(self.nose[63][1] - self.mouth[52][1]) #var y dos pontos 64 e 53
+        return mouth_pts_lgth
+         
+a = FacePoints(landmarks)
+a.mouthLength()
